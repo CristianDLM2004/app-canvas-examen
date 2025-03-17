@@ -742,3 +742,7 @@ canvas.addEventListener("mousemove", (event) => {
     mouseX = event.clientX - rect.left;
     mouseY = event.clientY - rect.top;
 });
+
+document.getElementById("startButton").addEventListener("click", function () {
+    document.getElementById("welcomeScreen").style.display = "none";
+});
