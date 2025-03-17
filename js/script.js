@@ -184,7 +184,7 @@ class Plant {
         if (gameOver || !plants.includes(this)) return; // Evitar disparar si la planta ya no está en el array
         if (zombies.some(zombie => zombie.row === this.row)) {
             guisantes.push(new Guisante(this.x + this.width / 2, this.y + this.height / 3));
-            playSound('media/audio/lanzar.mp3');
+            
         }
     }
 
@@ -248,6 +248,9 @@ setInterval(() => {
 }, 5000 + Math.random() * 5000); // Intervalo aleatorio entre 5s y 10s
 
 const zombieDamage=100;
+let zombieHealthIncrease = 0; // Incremento de vida de los zombis
+let zombieSpeedIncrease = 0; // Incremento de velocidad de los zombis
+
 class Zombie {
     constructor(x, row, speed = 0.04) { // Agregar parámetro de velocidad
         this.x = x;
@@ -255,10 +258,11 @@ class Zombie {
         this.y = gridOffsetY + row * cellHeight + (cellHeight - 70) / 2;
         this.width = 90;
         this.height = 90;
-        this.speed = speed; // Usar la velocidad pasada al constructor
+        this.speed = speed + zombieSpeedIncrease; // Usar la velocidad pasada al constructor
         this.eating = false;
         this.targetPlant = null;
-        this.health = 400;
+        this.health = 400 + zombieHealthIncrease; // Incrementar la vida de los zombis
+
         this.eatingSound = new Audio('media/audio/comiendo.mp3');
         this.eatingSound.loop = true;
         this.eatingSound.volume = 0.5;
@@ -268,6 +272,7 @@ class Zombie {
 
     takeDamage(amount) {
         this.health -= amount;
+        console.log(`🩸 Zombi recibió ${amount} de daño. Vida restante: ${this.health}`);
         playRandomHitSound(); // Reproducir sonido aleatorio de impacto
         if (this.health <= 0) {
             this.die();
@@ -288,6 +293,15 @@ class Zombie {
             zombies.splice(index, 1);
             zombiesOnScreen--; // Reducir el contador de zombis en pantalla
             zombiesEliminados++; // Aumentar el contador de eliminaciones
+            console.log(`🧟 Zombi eliminado. Total eliminados: ${zombiesEliminados}`);
+            
+            // Aumentar dificultad progresivamente
+if (zombiesEliminados % 10 === 0) { 
+    zombieSpeedIncrease += 0.04; // Aumenta un poco la velocidad
+    zombieHealthIncrease += 100; // Aumenta la vida de los zombis
+    console.log(`🔥 Dificultad aumentada: Vida +${zombieHealthIncrease}, Velocidad +${zombieSpeedIncrease}`);
+}
+
         }
     }
     
@@ -384,18 +398,22 @@ let totalZombiesGenerated = 0; // Cuántos zombis se han generado en total
 let maxZombiesAtOnce = 3; // Cantidad de zombis que pueden aparecer al mismo tiempo
 let zombiesOnScreen = 0; // Cuántos zombis hay actualmente en pantalla
 let zombiesEliminados = 0; // Contador de zombis eliminados
-let zombieSpeedIncrease = 0; // Incremento de velocidad
 
 function spawnZombies(amount) {
-    for (let i = 0; i < amount; i++) {
-        if (zombiesOnScreen < maxZombiesAtOnce) {
-            const row = Math.floor(Math.random() * gridRows);
-            zombies.push(new Zombie(canvas.width, row, 0.08 + zombieSpeedIncrease)); // Aplicar velocidad aumentada
-            zombiesOnScreen++;
-            totalZombiesGenerated++;
-        }
+    if (zombiesOnScreen >= maxZombiesAtOnce) return; // No genera si ya hay muchos
+
+    let zombiesToSpawn = Math.min(amount, maxZombiesAtOnce - zombiesOnScreen);
+
+    for (let i = 0; i < zombiesToSpawn; i++) {
+        const row = Math.floor(Math.random() * gridRows);
+        zombies.push(new Zombie(canvas.width, row, 0.08));
+        zombiesOnScreen++;
+        totalZombiesGenerated++;
     }
 }
+
+
+
 
 
 // Monitorea los zombis en pantalla y genera más cuando todos mueren
@@ -411,17 +429,22 @@ function checkZombieDeaths() {
 
 function startZombieSpawn() {
     setTimeout(() => {
-        spawnZombies(1); // Iniciar con un zombi tras 10s
-        checkZombieDeaths();
+        if (totalZombiesGenerated === 0) {
+            spawnZombies(1); // Solo uno al inicio
+        }
 
-        // Generación continua de zombis con un intervalo
-        setInterval(() => {
+        zombieSpawnInterval = setInterval(() => {
             if (zombiesOnScreen < maxZombiesAtOnce) {
-                spawnZombies(1); // Añadir zombis si hay espacio disponible
+                spawnZombies(1);
             }
-        }, 5000); // Genera un nuevo zombi cada 5 segundos
+        }, 8000); // Aumenta el tiempo de aparición
+
     }, 10000);
 }
+
+
+
+
 
 // Llamar esta función al iniciar el juego
 startZombieSpawn();
