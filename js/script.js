@@ -258,7 +258,7 @@ class Zombie {
         this.speed = speed; // Usar la velocidad pasada al constructor
         this.eating = false;
         this.targetPlant = null;
-        this.health = 800;
+        this.health = 400;
         this.eatingSound = new Audio('media/audio/comiendo.mp3');
         this.eatingSound.loop = true;
         this.eatingSound.volume = 0.5;
@@ -381,7 +381,7 @@ class Zombie {
 
 
 let totalZombiesGenerated = 0; // Cuántos zombis se han generado en total
-let maxZombiesAtOnce = 1; // Cantidad de zombis que pueden aparecer al mismo tiempo
+let maxZombiesAtOnce = 3; // Cantidad de zombis que pueden aparecer al mismo tiempo
 let zombiesOnScreen = 0; // Cuántos zombis hay actualmente en pantalla
 let zombiesEliminados = 0; // Contador de zombis eliminados
 let zombieSpeedIncrease = 0; // Incremento de velocidad
@@ -743,6 +743,67 @@ canvas.addEventListener("mousemove", (event) => {
     mouseY = event.clientY - rect.top;
 });
 
-document.getElementById("startButton").addEventListener("click", function () {
-    document.getElementById("welcomeScreen").style.display = "none";
+
+
+document.addEventListener("DOMContentLoaded", function () {
+    // Verifica que estamos en juego.html antes de ejecutar el temporizador
+    if (window.location.pathname.includes("juego.html")) {
+        let startTime = Date.now(); // Guarda el tiempo de inicio
+        let timerInterval;
+        let maxSurvivalTime = localStorage.getItem("maxTime") || 0; // Recupera el récord máximo
+
+        document.getElementById("maxTime").textContent = maxSurvivalTime; // Muestra el récord guardado
+
+        function startTimer() {
+            console.log("Iniciando temporizador...");
+            
+            // Obtener el tiempo máximo almacenado
+            let maxTime = localStorage.getItem("maxTime") || 0;
+            document.getElementById("maxTime").textContent = maxTime; // Mostrarlo al inicio
+        
+            timerInterval = setInterval(() => {
+                let elapsedTime = Math.floor((Date.now() - startTime) / 1000);
+                console.log("Tiempo sobrevivido:", elapsedTime);
+        
+                let timeSurvivedElement = document.getElementById("timeSurvived");
+                let maxTimeElement = document.getElementById("maxTime");
+        
+                if (timeSurvivedElement) {
+                    timeSurvivedElement.textContent = elapsedTime;
+                }
+        
+                // Verificar si el tiempo actual supera el tiempo máximo guardado
+                if (elapsedTime > maxTime) {
+                    maxTime = elapsedTime;
+                    localStorage.setItem("maxTime", maxTime); // Guardar nuevo máximo
+                    if (maxTimeElement) {
+                        maxTimeElement.textContent = maxTime;
+                    }
+                }
+            }, 1000);
+        }
+        
+
+        function stopTimer() {
+            clearInterval(timerInterval);
+            let finalTime = Math.floor((Date.now() - startTime) / 1000);
+            
+            // Comparar con el récord máximo y actualizar si es un nuevo récord
+            if (finalTime > maxSurvivalTime) {
+                maxSurvivalTime = finalTime;
+                localStorage.setItem("maxTime", maxSurvivalTime); // Guarda el nuevo récord
+                document.getElementById("maxTime").textContent = maxSurvivalTime;
+            }
+        }
+
+        // Iniciar el contador automáticamente cuando se cargue juego.html
+        startTimer();
+
+        // Llamar a esta función cuando el jugador pierda
+        window.onGameOver = function () {
+            stopTimer();
+            alert("¡Has perdido! Tiempo sobrevivido: " + document.getElementById("timeSurvived").textContent + " segundos.");
+        };
+    }
 });
+
