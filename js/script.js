@@ -461,7 +461,8 @@ function updateZombies() {
 
     // Aumentar la velocidad cada 10 zombis eliminados
     if (zombiesEliminados > 0 && zombiesEliminados % 10 === 0) {
-        zombieSpeedIncrease += 0.02; // Incremento de velocidad más gradual
+        zombieSpeedIncrease += 0.04;
+        zombieHealthIncrease +=200; // Incremento de velocidad más gradual
     }
 }
 
