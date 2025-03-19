@@ -298,7 +298,7 @@ class Zombie {
             // Aumentar dificultad progresivamente
 if (zombiesEliminados % 10 === 0) { 
     zombieSpeedIncrease += 0.04; // Aumenta un poco la velocidad
-    zombieHealthIncrease += 100; // Aumenta la vida de los zombis
+    zombieHealthIncrease += 300; // Aumenta la vida de los zombis
     console.log(`🔥 Dificultad aumentada: Vida +${zombieHealthIncrease}, Velocidad +${zombieSpeedIncrease}`);
 }
 
@@ -459,10 +459,10 @@ function updateZombies() {
     let zombiesKilled = zombiesBefore - zombiesOnScreen;
     zombiesEliminados += zombiesKilled;
 
-    // Aumentar la velocidad cada 10 zombis eliminados
+    // Aumentar la velocidad y la vida cada 10 zombis eliminados
     if (zombiesEliminados > 0 && zombiesEliminados % 10 === 0) {
         zombieSpeedIncrease += 0.04;
-        zombieHealthIncrease +=200; // Incremento de velocidad más gradual
+        zombieHealthIncrease +=200; 
     }
 }
 
